@@ -1,5 +1,5 @@
-import josn
-import pahtlib
+import json
+import pathlib
 
 import airflow
 import requests
