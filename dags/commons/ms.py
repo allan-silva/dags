@@ -1,0 +1,2 @@
+class MSElasticsearch:
+    pass
