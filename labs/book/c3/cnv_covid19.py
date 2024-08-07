@@ -6,7 +6,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 
 
-from dags.commons.ms import MSElasticsearch
+from labs.commons.ms import MSElasticsearch
 
 ms_elasticsearch = MSElasticsearch()
 
