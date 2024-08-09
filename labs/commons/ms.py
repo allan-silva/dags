@@ -1,11 +1,15 @@
+import pendulum
+
+
 class MSElasticsearch:
     def dag_get(self, ts):
         self.get_daily(ts)
 
     def get_daily(self, fetch_day):
-
-        start = fetch_day.start_of("day")
-        end = fetch_day.end_of("day")
+        
+        day = pendulum.parse(fetch_day)
+        start = day.start_of("day")
+        end = day.end_of("day")
 
         payload = {
             "query": {
@@ -26,3 +30,5 @@ class MSElasticsearch:
         print(end)
         print(payload)
         print("*" * 100)
+
+        return payload, start, end
