@@ -1,14 +1,18 @@
-import airflow
-
 from datetime import datetime
 
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 
 
 from labs.commons.ms import MSElasticsearch
 
-ms_elasticsearch = MSElasticsearch()
+
+ms_elasticsearch = MSElasticsearch(
+    Variable.get("MS_COVID19_CNV_CLUSTER_URL"),
+    Variable.get("MS_COVID19_CNV_CLUSTER_USER"),
+    Variable.get("MS_COVID19_CNV_CLUSTER_PASS")
+)
 
 
 dag = DAG(
@@ -20,7 +24,7 @@ dag = DAG(
 
 fetch_vaccination_data = PythonOperator(
     task_id="fetch_vaccination_data",
-    python_callable=ms_elasticsearch.dag_get,
+    python_callable=lambda ts: ms_elasticsearch.get_daily(ts),
     dag=dag
 )
 

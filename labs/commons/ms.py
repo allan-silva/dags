@@ -18,23 +18,23 @@ class ElasticOp:
 
 
 class MSElasticsearch:
-    def __init__(self):
-        self.cluster_url = os.getenv("MS_COVID19_CNV_CLUSTER_URL")
+    def __init__(self, cluster_url, user, password):
+        self.cluster_url = os.getenv("MS_COVID19_CNV_CLUSTER_URL", cluster_url)
         self.index = "desc-imunizacao"
         self.search_api_endpoint = "_search"
-        self.user = os.getenv("MS_COVID19_CNV_CLUSTER_USER")
-        self.password = os.getenv("MS_COVID19_CNV_CLUSTER_PASS")
+        self.user = os.getenv("MS_COVID19_CNV_CLUSTER_USER", user)
+        self.password = os.getenv("MS_COVID19_CNV_CLUSTER_PASS", password)
+
 
     @property
     def search_url(self):
         return f"{self.cluster_url}/{self.index}/{self.search_api_endpoint}"
 
+
     @property
     def auth(self):
         return HTTPBasicAuth(self.user, self.password)
 
-    def dag_get(self, ts):
-        self.get_daily(ts)
 
     def get_daily(self, fetch_day):
 
