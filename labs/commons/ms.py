@@ -58,4 +58,9 @@ class MSElasticsearch:
         response = requests.get(self.search_url, auth=self.auth, json=payload)
         response.raise_for_status()
 
+        print("*" * 100)
+        print(f"Start: {start} - End: {end}")
+        print(response.json())
+        print("*" * 100)
+
         return ElasticOp(payload, response.json(), {"start": start, "end": end})
