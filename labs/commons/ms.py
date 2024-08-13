@@ -18,7 +18,7 @@ class ElasticOp:
 
 
 class MSElasticsearch:
-    def __init__(self, cluster_url, user, password):
+    def __init__(self, cluster_url=None, user=None, password=None):
         self.cluster_url = os.getenv("MS_COVID19_CNV_CLUSTER_URL", cluster_url)
         self.index = "desc-imunizacao"
         self.search_api_endpoint = "_search"
@@ -37,17 +37,24 @@ class MSElasticsearch:
 
 
     def get_daily(self, fetch_day):
-
+        '''Book sample helper, must me ignored.'''
         day = pendulum.parse(fetch_day, tz=DEFAULT_TIME_ZONE)
-        start = day.start_of("day").format(DEFAULT_FORMAT)
-        end = day.end_of("day").format(DEFAULT_FORMAT)
+        start = day.start_of("day")
+        end = day.end_of("day")
 
+        return next(self.get_interval(start, end))
+
+
+    def get_interval(self, start, end=None, skip=0, batch_size=10):
+        start_interval = start.format(DEFAULT_FORMAT)
+        end_interval = end if end else start.end_of("day")
+        end_interval = end_interval.format(DEFAULT_FORMAT)
         payload = {
             "query": {
                 "range": {
                     "@timestamp": {
-                        "gte": start,
-                        "lte": end,
+                        "gte": start_interval,
+                        "lte": end_interval,
                     }
                 }
             },
@@ -59,8 +66,8 @@ class MSElasticsearch:
         response.raise_for_status()
 
         print("*" * 100)
-        print(f"Start: {start} - End: {end}")
+        print(f"Start: {start_interval} - End: {end_interval}")
         print(response.json())
         print("*" * 100)
 
-        return ElasticOp(payload, response.json(), {"start": start, "end": end})
+        yield ElasticOp(payload, response.json(), {"start": start_interval, "end": end_interval})
