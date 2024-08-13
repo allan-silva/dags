@@ -22,11 +22,15 @@ dag = DAG(
 )
 
 
+def fetch_vaccination_data(data_interval_start, data_interval_end):
+    ms_elasticsearch.get_interval(
+        data_interval_start, data_interval_end
+    )
+
+
 fetch_vaccination_data = PythonOperator(
     task_id="fetch_vaccination_data",
-    python_callable=lambda data_interval_start, data_interval_end: ms_elasticsearch.get_interval(
-        data_interval_start, data_interval_end
-    ),
+    python_callable=fetch_vaccination_data,
     dag=dag,
 )
 
