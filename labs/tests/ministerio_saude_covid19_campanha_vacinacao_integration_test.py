@@ -13,13 +13,14 @@ def env_vars():
 
 
 def test_get_interval(env_vars):
-    date = pendulum.datetime(2024, 8, 7, 0, 0, 0)
+    date_start = pendulum.datetime(2024, 8, 7, 0, 0, 0)
+    date_end = pendulum.datetime(2024, 8, 8, 0, 0, 0)
     expected_string_start_date = "2024-08-07T00:00:00.000+00:00"
-    expected_string_end_date = "2024-08-07T23:59:59.999+00:00"
+    expected_string_end_date = "2024-08-08T00:00:00.000+00:00"
 
     ms_elastic = MSElasticsearch()
     batch_size = 5
-    elastic_op = next(ms_elastic.get_interval(date, batch_size=batch_size))
+    elastic_op = next(ms_elastic.get_interval(date_start, date_end, batch_size=batch_size))
 
     print(expected_string_start_date)
     assert expected_string_start_date == elastic_op.request_payload["query"]["range"]["@timestamp"]["gte"]
