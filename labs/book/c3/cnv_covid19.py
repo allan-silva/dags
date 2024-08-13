@@ -17,7 +17,9 @@ ms_elasticsearch = MSElasticsearch(
 )
 
 
-dag = DAG(dag_id="cnv_covid19", start_date=datetime(2024, 1, 1), schedule_interval=pendulum.date(2024, 8, 1))
+dag = DAG(
+    dag_id="cnv_covid19", start_date=datetime(2024, 1, 1), schedule_interval="@daily"
+)
 
 
 fetch_vaccination_data = PythonOperator(
