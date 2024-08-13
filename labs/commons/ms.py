@@ -36,15 +36,6 @@ class MSElasticsearch:
         return HTTPBasicAuth(self.user, self.password)
 
 
-    def get_daily(self, fetch_day):
-        '''Book practice helper, must me ignored.'''
-        day = pendulum.parse(fetch_day, tz=DEFAULT_TIME_ZONE)
-        start = day.start_of("day")
-        end = day.end_of("day")
-
-        return next(self.get_interval(start, end))
-
-
     def get_interval(self, start, end=None, skip=0, batch_size=10):
         start_interval = start.format(DEFAULT_FORMAT)
         end_interval = end if end else start.end_of("day")
@@ -58,8 +49,8 @@ class MSElasticsearch:
                     }
                 }
             },
-            "from": 0,
-            "size": 100,
+            "from": skip,
+            "size": batch_size,
         }
 
         response = requests.get(self.search_url, auth=self.auth, json=payload)
