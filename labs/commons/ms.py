@@ -37,7 +37,7 @@ class MSElasticsearch:
 
 
     def get_daily(self, fetch_day):
-        '''Book sample helper, must me ignored.'''
+        '''Book practice helper, must me ignored.'''
         day = pendulum.parse(fetch_day, tz=DEFAULT_TIME_ZONE)
         start = day.start_of("day")
         end = day.end_of("day")
