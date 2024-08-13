@@ -38,7 +38,7 @@ class MSElasticsearch:
 
     def get_interval(self, start, end=None, skip=0, batch_size=10):
         start_interval = start.format(DEFAULT_FORMAT)
-        end_interval = end if end else start.end_of("day")
+        end_interval = end.start_of('day') if end else start.start_of('day')
         end_interval = end_interval.format(DEFAULT_FORMAT)
         payload = {
             "query": {
@@ -53,11 +53,12 @@ class MSElasticsearch:
             "size": batch_size,
         }
 
+        print("*" * 100)
+        print(f"Start: {start_interval} - End: {end_interval}")
+
         response = requests.get(self.search_url, auth=self.auth, json=payload)
         response.raise_for_status()
 
-        print("*" * 100)
-        print(f"Start: {start_interval} - End: {end_interval}")
         print(response.json())
         print("*" * 100)
 

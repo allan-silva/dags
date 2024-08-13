@@ -23,6 +23,7 @@ dag = DAG(
 
 
 def fetch_vaccination_data(data_interval_start, data_interval_end):
+    print(f"Call MS Elastic search with {data_interval_start} - {data_interval_end}")
     ms_elasticsearch.get_interval(
         data_interval_start, data_interval_end
     )
