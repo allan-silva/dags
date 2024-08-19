@@ -8,7 +8,7 @@ from airflow.operators.bash import BashOperator
 
 dag = DAG(
     dag_id="wiki_stock_sense",
-    start_date=pendulum.now().subtract(days=3),
+    start_date=pendulum.now().subtract(days=1),
     schedule_interval="@hourly",
 )
 
@@ -29,7 +29,7 @@ get_data = PythonOperator(
     task_id="get_data",
     python_callable=_get_data,
     op_kwargs={
-        "wiki_url": "",
+        "wiki_url": "https://dumps.wikimedia.org/other/pageviews",
         "output_path": "/tmp/wikipageviews.gz"
     },
     dag=dag,
