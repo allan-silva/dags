@@ -29,7 +29,7 @@ def _get_data(wiki_url, output_dir, output_file, logical_date, **_):
 
     mkdir(output_dir)
 
-    with open(join_path(output_dir, output_file, "wb") as f:
+    with open(join_path(output_dir, output_file), "wb") as f:
         for chunk in response.iter_content(chunk_size=1024):
             f.write(chunk)
 
