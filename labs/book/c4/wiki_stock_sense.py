@@ -16,7 +16,7 @@ dag = DAG(
 )
 
 
-def _get_data(wiki_url, output_path, logical_date):
+def _get_data(wiki_url, output_path, logical_date, **_):
     url = (
         f"{wiki_url}/{logical_date.year}/{logical_date.year}-{logical_date.month:0>2}"
         f"/pageviews-{logical_date.year}{logical_date.month:0>2}{logical_date.day:0>2}"
