@@ -9,7 +9,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 dag = DAG(
     dag_id="wiki_stock_sense",
-    start_date=pendulum.now().subtract(days=1),
+    start_date=pendulum.now().subtract(days=10),
     schedule_interval="@hourly",
     template_searchpath="/tmp",
 )
