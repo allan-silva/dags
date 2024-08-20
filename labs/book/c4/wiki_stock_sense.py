@@ -5,13 +5,14 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.models import Variable
 
 
 dag = DAG(
     dag_id="wiki_stock_sense",
-    start_date=pendulum.now().subtract(days=10),
+    start_date=pendulum.now().subtract(days=1),
     schedule_interval="@hourly",
-    template_searchpath="/tmp",
+    template_searchpath="{{var.value.get('LOCAL_STORAGE')}}/ch4",
 )
 
 
@@ -32,7 +33,7 @@ get_data = PythonOperator(
     python_callable=_get_data,
     op_kwargs={
         "wiki_url": "https://dumps.wikimedia.org/other/pageviews",
-        "output_path": "/tmp/wikipageviews.gz",
+        "output_path": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}.gz",
     },
     dag=dag,
 )
@@ -40,24 +41,24 @@ get_data = PythonOperator(
 
 extract_data = BashOperator(
     task_id="extract_data",
-    bash_command="gunzip --force /tmp/wikipageviews.gz",
+    bash_command="gunzip --force {{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}.gz",
     dag=dag,
 )
 
 
-def _fetch_pageviews(pagenames, execution_date, **_):
+def _fetch_pageviews(page_views_file, output_file, pagenames, logical_date, **_):
     result = dict.fromkeys(pagenames, 0)
-    with open("/tmp/wikipageviews", "r") as f:
+    with open(page_views_file, "r") as f:
         for line in f:
             domain_code, page_title, view_counts, _ = line.split(" ")
             if domain_code == "en" and page_title in pagenames:
                 result[page_title] = view_counts
 
-    with open("/tmp/postgres_query.sql", "w") as f:
+    with open(output_file, "w") as f:
         for pagename, pageviewcount in result.items():
             f.write(
                 "INSERT INTO pageview_counts VALUES ("
-                f"'{pagename}', {pageviewcount}, '{execution_date}'"
+                f"'{pagename}', {pageviewcount}, '{logical_date}'"
                 ");\n"
             )
 
@@ -65,7 +66,11 @@ def _fetch_pageviews(pagenames, execution_date, **_):
 fetch_pageviews = PythonOperator(
     task_id="fetch_pageviews",
     python_callable=_fetch_pageviews,
-    op_kwargs={"pagenames": {"Google", "Amazon", "Apple", "Microsoft", "Facebook"}},
+    op_kwargs={
+        "page_views_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}",
+        "pagenames": {"Google", "Amazon", "Apple", "Microsoft", "Facebook"},
+        "output_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}.sql",
+        },
     dag=dag,
 )
 
@@ -73,7 +78,7 @@ fetch_pageviews = PythonOperator(
 write_to_postgres = PostgresOperator(
     task_id="write_to_postgres",
     postgres_conn_id="postgres-default",
-    sql="postgres_query.sql",
+    sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}.sql",
     dag=dag,
 )
 
