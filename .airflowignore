@@ -1,2 +1,2 @@
-dags/book/validate.py
-dags/commons/.*
+labs/commons/.*
+labs/tests/.*
