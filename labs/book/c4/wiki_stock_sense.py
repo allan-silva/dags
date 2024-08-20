@@ -5,7 +5,8 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.models import Variable
+
+from labs.commons.fileutils import mkdir, join_path
 
 
 dag = DAG(
@@ -16,14 +17,19 @@ dag = DAG(
 )
 
 
-def _get_data(wiki_url, output_path, logical_date, **_):
+def _get_data(wiki_url, output_dir, output_file, logical_date, **_):
     url = (
         f"{wiki_url}/{logical_date.year}/{logical_date.year}-{logical_date.month:0>2}"
         f"/pageviews-{logical_date.year}{logical_date.month:0>2}{logical_date.day:0>2}"
         f"-{logical_date.hour}0000.gz"
     )
     response = requests.get(url, stream=True)
-    with open(output_path, "wb") as f:
+
+    response.raise_for_status()
+
+    mkdir(output_dir)
+
+    with open(join_path(output_dir, output_file, "wb") as f:
         for chunk in response.iter_content(chunk_size=1024):
             f.write(chunk)
 
@@ -33,7 +39,8 @@ get_data = PythonOperator(
     python_callable=_get_data,
     op_kwargs={
         "wiki_url": "https://dumps.wikimedia.org/other/pageviews",
-        "output_path": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.hour}}0000.gz",
+        "output_dir": "{{var.value.get('LOCAL_STORAGE')}}/ch4",
+        "output_file": "wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.hour}}0000.gz"
     },
     dag=dag,
 )

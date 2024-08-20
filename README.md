@@ -3,6 +3,10 @@ My labs - Airflow DAGs
 
 ## Misc
 
+### Run PyTest ignoring DAGs tests:
+`pytest labs/ --ignore=labs/tests/dags/`
+
+
 ### Render template args without execute task:
 
 `airflow tasks render [dag id] [task id] [desired execution date]`  
@@ -12,5 +16,5 @@ My labs - Airflow DAGs
 
 ### Add Airflow connection:
 
-`airflow connections add --conn-type postgres --conn-host 192.168.60.30 --conn-login labsu --conn-password labsu postgres-default`
+`airflow connections add --conn-type postgres --conn-host 192.168.60.30 --conn-login labsu --conn-password labsu --conn-schema ch4_stock_sense postgres-default`
 
