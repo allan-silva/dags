@@ -33,7 +33,7 @@ get_data = PythonOperator(
     python_callable=_get_data,
     op_kwargs={
         "wiki_url": "https://dumps.wikimedia.org/other/pageviews",
-        "output_path": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}-{{logical_date.hour}}0000.gz",
+        "output_path": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month}}{{logical_date.day}}-{{logical_date.hour}}0000.gz",
     },
     dag=dag,
 )
@@ -41,7 +41,7 @@ get_data = PythonOperator(
 
 extract_data = BashOperator(
     task_id="extract_data",
-    bash_command="gunzip --force {{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}-{{logical_date.hour}}0000.gz",
+    bash_command="gunzip --force {{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month}}{{logical_date.day}}-{{logical_date.hour}}0000.gz",
     dag=dag,
 )
 
@@ -67,9 +67,9 @@ fetch_pageviews = PythonOperator(
     task_id="fetch_pageviews",
     python_callable=_fetch_pageviews,
     op_kwargs={
-        "page_views_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}-{{logical_date.hour}}0000",
+        "page_views_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month}}{{logical_date.day}}-{{logical_date.hour}}0000",
         "pagenames": {"Google", "Amazon", "Apple", "Microsoft", "Facebook"},
-        "output_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}-{{logical_date.hour}}0000.sql",
+        "output_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month}}{{logical_date.day}}-{{logical_date.hour}}0000.sql",
         },
     dag=dag,
 )
@@ -78,7 +78,7 @@ fetch_pageviews = PythonOperator(
 write_to_postgres = PostgresOperator(
     task_id="write_to_postgres",
     postgres_conn_id="postgres-default",
-    sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month:0>2}}{{logical_date.day:0>2}}-{{logical_date.hour}}0000.sql",
+    sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.month}}{{logical_date.day}}-{{logical_date.hour}}0000.sql",
     dag=dag,
 )
 
