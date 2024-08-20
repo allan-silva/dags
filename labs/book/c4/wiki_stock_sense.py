@@ -12,6 +12,7 @@ from labs.commons.fileutils import mkdir, join_path
 dag = DAG(
     dag_id="wiki_stock_sense",
     start_date=pendulum.now().subtract(days=1),
+    end_date=pendulum.datetime(2020, 8, 13, 0, 0, 0),
     schedule_interval="@hourly",
     template_searchpath="{{var.value.get('LOCAL_STORAGE')}}/ch4",
 )
