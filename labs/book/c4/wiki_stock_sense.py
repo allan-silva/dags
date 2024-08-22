@@ -85,7 +85,7 @@ fetch_pageviews = PythonOperator(
 
 write_to_postgres = SQLExecuteQueryOperator(
     task_id="write_to_postgres",
-    postgres_conn_id="postgres-default",
+    conn_id="postgres-default",
     sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.sql",
     dag=dag,
 )
