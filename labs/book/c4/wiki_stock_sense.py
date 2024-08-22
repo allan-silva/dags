@@ -4,7 +4,7 @@ import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 
 from labs.commons.fileutils import mkdir, join_path
 
@@ -83,7 +83,7 @@ fetch_pageviews = PythonOperator(
 )
 
 
-write_to_postgres = PostgresOperator(
+write_to_postgres = SQLExecuteQueryOperator(
     task_id="write_to_postgres",
     postgres_conn_id="postgres-default",
     sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.sql",
