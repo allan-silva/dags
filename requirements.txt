@@ -2,3 +2,4 @@ apache-airflow==2.9.3
 black
 pytest
 apache-airflow-providers-common-sql
+psycopg[binary]

@@ -4,9 +4,10 @@ import pendulum
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.operators.bash import BashOperator
-from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+from airflow.models.connection import Connection
 
 from labs.commons.fileutils import mkdir, join_path
+from labs.commons.sql import execute_sql_file
 
 
 dag = DAG(
@@ -41,7 +42,7 @@ get_data = PythonOperator(
     op_kwargs={
         "wiki_url": "https://dumps.wikimedia.org/other/pageviews",
         "output_dir": "{{var.value.get('LOCAL_STORAGE')}}/ch4",
-        "output_file": "wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.gz"
+        "output_file": "wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.gz",
     },
     dag=dag,
 )
@@ -78,15 +79,23 @@ fetch_pageviews = PythonOperator(
         "page_views_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000",
         "pagenames": {"Google", "Amazon", "Apple", "Microsoft", "Facebook"},
         "output_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.sql",
-        },
+    },
     dag=dag,
 )
 
 
-write_to_postgres = SQLExecuteQueryOperator(
+def _write_to_postgres(conn_id, sql_file, **_):
+    connection = Connection.get_connection_from_secrets(conn_id)
+    execute_sql_file(connection, sql_file)
+
+
+write_to_postgres = PythonOperator(
     task_id="write_to_postgres",
-    conn_id="postgres-default",
-    sql="{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.sql",
+    python_callable=_write_to_postgres,
+    op_kwargs={
+        "conn_id": "postgres-default",
+        "sql_file": "{{var.value.get('LOCAL_STORAGE')}}/ch4/wikipageviews{{logical_date.year}}{{logical_date.format('MM')}}{{logical_date.format('DD')}}-{{logical_date.format('HH')}}0000.sql",
+    },
     dag=dag,
 )
 
